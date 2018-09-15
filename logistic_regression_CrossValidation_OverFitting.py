@@ -68,7 +68,6 @@ for T in range(iteration_count):
     if T % 5 ==0 :
         print('T=' + str(T) + ' loss=' + str(loss) + ' error=' + str(error_rate))
     
-    # 计算损失函数关于beta每个分量的导数
     # compute the partial derivative in terms of each component of beta.
     # X.shape[1] is feature count. we should compute such number of partial derivatives parallelly to each sample
     deriv = np.zeros(X.shape[1])
@@ -84,7 +83,6 @@ for T in range(iteration_count):
     # get average of derivatives of sample/labels
     deriv /= len(y)
     
-    # 沿导数相反方向修改beta
     # descent the gradient of β (in all dimensions)
     beta -= alpha * deriv
 
@@ -158,17 +156,16 @@ model_LR.fit(X, y)
 overfitting test
      for error_rate comparsion between training_set and validation_set:
 '''
-# training_set/testing_set : 7:3
-Xtrain, Xvali, ytrain, yvali = train_test_split(X, y, test_size=0.3, random_state=0)
+# training_set/testing_set : 8:2
+Xtrain, Xvali, ytrain, yvali = train_test_split(X, y, test_size=0.2, random_state=0)
 
 np.random.seed(1)
-alpha = 1  # learning rate
-beta = np.random.randn(Xtrain.shape[1]) # initial randomly
+alpha = 5 # learning rate
+beta = np.random.randn(Xtrain.shape[1])
 error_rates_train=[]
 error_rates_vali=[]
-iteration_count = 200
-for T in range(iteration_count):
-    prob = np.array(1. / (1 + np.exp(-np.matmul(Xtrain, beta)))).ravel() 
+for T in range(200):
+    prob = np.array(1. / (1 + np.exp(-np.matmul(Xtrain, beta)))).ravel()  # predict probability of left using current BETA
     prob_y = list(zip(prob, ytrain))
     loss = -sum([np.log(p) if y == 1 else np.log(1 - p) for p, y in prob_y]) / len(ytrain) # compute the loss function
     error_rate = 0
@@ -180,17 +177,17 @@ for T in range(iteration_count):
     
     prob_vali = np.array(1. / (1 + np.exp(-np.matmul(Xvali, beta)))).ravel()  # predict the probability of left on validation_set
     prob_y_vali = list(zip(prob_vali, yvali))
-    loss = -sum([np.log(p) if y == 1 else np.log(1 - p) for p, y in prob_y_vali]) / len(yvali) # compute the loss function
+    loss_vali = -sum([np.log(p) if y == 1 else np.log(1 - p) for p, y in prob_y_vali]) / len(yvali) # compute the loss function
     error_rate_vali = 0
     for i in range(len(yvali)):
-        if ((prob[i] > 0.5 and yvali[i] == 0) or (prob[i] <= 0.5 and yvali[i] == 1)):
+        if ((prob_vali[i] > 0.5 and yvali[i] == 0) or (prob_vali[i] <= 0.5 and yvali[i] == 1)):
             error_rate_vali += 1
     error_rate_vali /= len(yvali)
     error_rates_vali.append(error_rate_vali)
     
     if T % 5 ==0 :
-        print('T=' + str(T) + ' loss=' + str(loss) + ' error=' + str(error_rate))
-        
+        print('T=' + str(T) + ' loss=' + str(loss) + ' error=' + str(error_rate)+ ' error_vali=' + str(error_rate_vali))
+    
     # compute dLoss/dBetas
     deriv = np.zeros(Xtrain.shape[1])
     for i in range(len(ytrain)):
@@ -207,9 +204,8 @@ T=10 loss=0.6030253387203952 error=0.27107343556529195
 '''
 
 # draw the two curves of error_rate from training_set and validation_set simultaneously.
-plt.plot(range(0,200), error_rates_train, 'r^', range(0, 200), error_rates_vali, 'bs')
+plt.plot(range(50,200), error_rates_train[50:], 'r^', range(50, 200), error_rates_vali[50:], 'bs')
 plt.show()  # overfitting show
-
 
 
 ''' -------------------------------------------------------
