@@ -70,14 +70,11 @@ print('New shape: ', im4d.shape)
 # create a new graph for the following session
 model = tf.Graph()
 
-# 使用 model.as_default() 设model为默认, 接下来的操作是在model中了, 而不是在原先的系统默认graph中
-# 这里的变量定义全部在model中
 with model.as_default():
-
     # perform a 1x1 convolution with 3 channels (only 1 kernel)
-    channels = [[0.21], [0.72], [0.07]]     # array shape: 3x1         对应r, g, b各分量在灰度图中的权重
+    channels = [[0.21], [0.72], [0.07]]     # array shape: 3x1         component r, g, b's weights
     array_1x3x1 = [channels]
-    kernel_1x1x3x1 = [array_1x3x1]          # 注意kernels的最后一维代表kernel的个数, 也就是输出featuremaps的channel数 !!!
+    kernel_1x1x3x1 = [array_1x3x1]
 
 
     # kernel shape = (1, 1, 3, 1):  size 1x1, 3 channels, only 1 kernel             kernel = tf.constant([[[[0.21], [0.72], [0.07]]]], dtype=tf.float32)
@@ -89,19 +86,16 @@ with model.as_default():
 
 
     # gray is a op executing 1x1 convolution
-    # inputdata:            (1, 451, 451, 3)        1张图片
-    # kernel:                   (1,   1,  3, 1)     size(1x1), 3 channels, 只有1个kernel
-    # output featuremaps:   (1, 451, 451, 1)        1个featuremap(来自1张图片), size(451x451), 1 channels(来自1个kernel)
+    # inputdata:            (1, 451, 451, 3)        1 picture
+    # kernel:                   (1,   1,  3, 1)     size(1x1), 3 channels,  only 1 kernel
+    # output featuremaps:   (1, 451, 451, 1)        1个featuremap(from  picture), size(451x451), 1 channels(from 1 kernel)
     gray = tf.nn.conv2d(inputdata, kernel, strides = [1, 1, 1, 1], padding='SAME')
 
-
-    # ===  到这里为止我们用1x1 卷积核将3通道彩色图片转换为1通 道灰度图  ===
-    #       gray就是后面convolution操作的输入图片
+    # ===  got grayscale picture (8bit)  ===
 
 
     # 5x5 Gabor filter kernel with shape(5, 5, 1, 1)
     #                               size(5x5), 1 channel, only 1 kernel
-    # 注意这里的用法：将nparray转换为tensor的kernel
     kernel_gabor1  = tf.convert_to_tensor(wts2_4d_gabor1, dtype=tf.float32)
     kernel_gabor2  = tf.convert_to_tensor(wts2_4d_gabor2, dtype=tf.float32)
     kernel_gabor3  = tf.convert_to_tensor(wts2_4d_gabor3, dtype=tf.float32)
@@ -111,7 +105,7 @@ with model.as_default():
 
 
     # vert is a op executing 5x5 convolution
-    # inputdata: gray.shape(1, 451, 451, 1): 1张图片, size(451x451), 1 channel
+    # inputdata: gray.shape(1, 451, 451, 1): 1 picture, size(451x451), 1 channel
     vert            = tf.nn.conv2d(gray, kernel_gabor1, [1, 1, 1, 1], padding='SAME')
     diagonal_ccw    = tf.nn.conv2d(gray, kernel_gabor2, [1, 1, 1, 1], padding='SAME')
     horizonal       = tf.nn.conv2d(gray, kernel_gabor3, [1, 1, 1, 1], padding='SAME')
@@ -119,8 +113,6 @@ with model.as_default():
 
     
 # use 'model' as new graph to execute gray operation
-# session用来执行刚才定义的graph（model），sess.run(gray)代表激活运行gray这个tensor，
-# 系统会从最开始的inputdata获取输入数据，做卷积，将output featuremaps（size(1,451,451, 1)）返回给output
 with tf.Session(graph = model) as sess:
     output = sess.run(gray)
 
