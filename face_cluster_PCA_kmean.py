@@ -48,10 +48,9 @@ def face_pca(faces, k):
 
 k = 150
 faces_pca, eigen_faces = face_pca(faces_image, k)
-# Show eigen faces
-fig, axes = plt.subplots(3, 4, figsize=(11, 6),
-                         subplot_kw={'xticks':[], 'yticks':[]},
-                         gridspec_kw=dict(hspace=0.1, wspace=1.1))
+
+# show top 12 eigen faces
+fig, axes = plt.subplots(3, 4, figsize=(11, 6))
 for i, ax in enumerate(axes.flat):
     ax.imshow(eigen_faces[i], cmap='bone')
 plt.show()
@@ -59,16 +58,14 @@ plt.show()
 
 # show the first 12 pictures in the result of PCA
 print('dimensionality reducted whatever: ')
-fig, axes = plt.subplots(3, 4, figsize=(11, 6),
-                         subplot_kw={'xticks':[], 'yticks':[]},
-                         gridspec_kw=dict(hspace=0.1, wspace=1.1))
+fig, axes = plt.subplots(3, 4, figsize=(11, 6))
 for i, ax in enumerate(axes.flat):
-    dr_whatever = faces_pca[i].reshape(10, 15)
+    dr_whatever = faces_pca[i].reshape(10, -1)
     ax.imshow(dr_whatever, cmap='bone')
 
 
 '''
-------------   k_means   ---------------
+    ------------   k_means   ---------------
 '''
 # store final_cluster_ids to KMeans.labels
 class KMeans():
@@ -101,7 +98,7 @@ class KMeans():
         n = data.shape[0]
         # labels assigned for each sample
         cluster_labels = np.zeros(n)
-        # n distances of samples and the corresponding centroids
+        # n distances between each sample and the corresponding centroid
         cluster_dists = np.full(n, np.inf)
         
         # randomly initialize k centroids
@@ -111,6 +108,7 @@ class KMeans():
             # if no sample's label is changed, no more iteration needed
             cluster_changed = False
             
+            # step 1. use updated centroids to assign each sample's label
             for i in range(n):
                 sample = data[i, :]
                 min_dist = np.inf
@@ -126,14 +124,14 @@ class KMeans():
                         min_index = j
                 
                 if cluster_labels[i] != min_index and cluster_dists[i] > min_dist:
-                    cluster_changed = True
+                    cluster_changed = True  # at least 1 sample's label is changed, needs more iteration
                     cluster_labels[i] = min_index 
                     cluster_dists[i] = min_dist
 
             if not cluster_changed:
                 break
             
-            # adjust all centroid by using new clusters
+            # step 2. adjust all centroid by using new clusters
             for i in range(self.k):
                 index = np.nonzero(cluster_labels == i)[0]
                 centroids[i, :] = np.mean(data[index], axis=0)
@@ -151,9 +149,7 @@ for i in range(cluster_num):
     index = np.nonzero(labels==i)[0]
     num = len(index)
     this_faces = faces_image[index]
-    fig, axes = plt.subplots(1, num, figsize=(4 * num, 4),
-                             subplot_kw={'xticks':[], 'yticks':[]},
-                             gridspec_kw=dict(hspace=0.1, wspace=0.1))
+    fig, axes = plt.subplots(1, num, figsize=(4 * num, 4))
     fig.suptitle("Cluster " + str(i), fontsize=20)
     for i, ax in enumerate(axes.flat):
         ax.imshow(this_faces[i], cmap='bone')
