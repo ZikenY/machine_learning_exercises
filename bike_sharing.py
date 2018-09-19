@@ -186,7 +186,7 @@ print((((d - d.mean()) / d.std()) ** 3).mean())
 # output: 0.5802734147871008
 
 '''
-考察连续feature
+    analysis numerical features
 '''
 sns.heatmap(train[['temp', 'atemp', 'humidity', 'windspeed', 'count']].corr(), fmt='.4f', annot=True, square=True)
 
