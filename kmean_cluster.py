@@ -1,16 +1,7 @@
 # -*- coding: utf-8 -*-
 #################################################
 # kmeans: k-means cluster
-# Author : zouxy
-# Date   : 2013-12-25
-# HomePage : http://blog.csdn.net/zouxy09
-# Email  : zouxy09@qq.com
 #################################################
-
-'''
-http://blog.csdn.net/zouxy09/article/details/17589329
-'''
-
 from numpy import *
 import sys
 import time
