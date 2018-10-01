@@ -17,17 +17,14 @@ from sklearn.base import BaseEstimator
 def f(X):
     return 3*X + 4
 
-N = 40              # 总共40个点
-noise_level = 0.8   # 噪声范围+-0.8
+N = 40            
+noise_level = 0.8 
 
-# 在 (-4, 4) 范围内生成40个点
 trainX = np.linspace(-4.0, 4.0, N)
-# 打乱顺序
 np.random.shuffle(trainX)
 
-# 生成40高斯分布的噪声（irreducible error）
+# irreducible error
 noise = np.random.randn(N) * noise_level
-# 在label中加入噪声
 labels = f(trainX) + noise
 
 # peek the train_set:
